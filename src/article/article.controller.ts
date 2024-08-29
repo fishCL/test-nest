@@ -6,6 +6,7 @@ import {
   Body,
   Put,
   Delete,
+  Patch,
 } from '@nestjs/common';
 import { ArticleService } from './article.service';
 import { Article as ArticleModel } from '@prisma/client';
@@ -13,10 +14,6 @@ import { Article as ArticleModel } from '@prisma/client';
 @Controller('article')
 export class ArticleController {
   constructor(private readonly articleService: ArticleService) {}
-  @Get(':id')
-  async getArticle(@Param('id') id: string): Promise<ArticleModel> {
-    return this.articleService.getArticle({ id: Number(id) });
-  }
 
   @Post()
   async createArticle(
@@ -28,5 +25,29 @@ export class ArticleController {
       content,
       subTitle,
     });
+  }
+  @Patch(':id')
+  async updateArticle(
+    @Body()
+    articleData: {
+      title?: string;
+      content?: string;
+      subTitle?: string;
+      published?: boolean;
+    },
+    @Param('id') id: number,
+  ): Promise<ArticleModel> {
+    return this.articleService.updateArticle(articleData, id);
+  }
+
+  @Get('list')
+  async getArticleList(): Promise<ArticleModel[]> {
+    return this.articleService.getArticles({
+      where: { published: true },
+    });
+  }
+  @Get(':id')
+  async getArticle(@Param('id') id: string): Promise<ArticleModel> {
+    return this.articleService.getArticle({ id: Number(id) });
   }
 }
